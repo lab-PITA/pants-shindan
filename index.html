@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>究極のパンツ鑑定書</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto+Sans+JP', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f5f5f5; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e5e5; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #db2777; }
+        .pants-shape { clip-path: polygon(10% 30%, 50% 20%, 90% 30%, 85% 70%, 50% 85%, 15% 70%); }
+    </style>
+</head>
+<body class="bg-neutral-50 text-neutral-800">
+
+    <div id="app" class="max-w-lg mx-auto min-h-screen flex flex-col p-6 relative">
+        <!-- Loading or JS placeholder -->
+        <div id="loading" class="flex-1 flex items-center justify-center">
+            <p class="text-neutral-400 animate-pulse">読み込み中...</p>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                title: "1. 今のあなたの「精神状態」をパンツの質感で例えると？",
+                options: [
+                    "1: つるつるシルク", "2: ごわごわ麻", "3: ぬくぬくカシミア", "4: べたべたラバー", "5: パリパリ和紙",
+                    "6: もこもこボア", "7: ザラザラ砂利", "8: ヒンヤリ大理石", "9: ふかふか羽毛", "10: ぎらぎら金箔",
+                    "11: ぷにぷにゼリー", "12: じっとり湿布", "13: ぱきぱき氷", "14: しなしなレタス", "15: チクチクウニ",
+                    "16: カサカサ落ち葉", "17: ヌルヌル鰻", "18: ゴツゴツ溶岩", "19: スベスベ陶器", "20: ペタペタ粘土",
+                    "21: サラサラ小麦粉", "22: ジャリジャリダイヤモンド", "23: シュワシュワ炭酸", "24: ベタベタ蜂蜜", "25: カチカチ鋼鉄",
+                    "26: ボロボロ古布", "27: モヤモヤ雲", "28: ビリビリ静電気", "29: ツヤツヤ漆", "30: シャリシャリ梨",
+                    "31: プルプルプリン", "32: バキバキ乾燥肌", "33: ホカホカ肉まん", "34: ツルリと剥けた卵", "35: ズッシリ重り",
+                    "36: ヒラヒラ蝶", "37: モゾモゾ芋虫", "38: カリカリ揚げ物", "39: ネットリ納豆", "40: ピカピカ鏡",
+                    "41: モフモフ犬の耳", "42: トゲトゲ有刺鉄線", "43: スースーミント", "44: ガサガサ段ボール", "45: ニュルリと歯磨き粉",
+                    "46: フワフワ綿菓子", "47: バサバサ鳥の羽", "48: メキメキ成長する木", "49: ウネウネ触手", "50: 真っさらな無"
+                ]
+            },
+            {
+                title: "2. そのパンツに「秘められた特殊能力」は何ですか？",
+                options: [
+                    "1: 3秒だけ時間を止める", "2: Wi-Fiの感度が上がる", "3: 猫にだけモテる", "4: どんな嘘も見抜く", "5: 重力を10%軽減する",
+                    "6: カロリーを勝手に消費する", "7: 常に適温を保つ", "8: 嫌な記憶を吸い取る", "9: 語彙力が爆発する", "10: スピード違反を防ぐ",
+                    "11: 金運をわずかに寄せる", "12: 虫を寄せ付けない", "13: 相手の空腹度がわかる", "14: 水中で息ができる", "15: 植物を成長させる",
+                    "16: 忘れ物を検知する", "17: 自動で洗濯される", "18: 夢を自由に操る", "19: 視力が1.2固定になる", "20: 誰からも道を聞かれない",
+                    "21: 電子レンジを不要にする", "22: ジャンケンに勝つ", "23: 常にいい匂いがする", "24: 影を薄くする", "25: 幽霊を物理で殴れる",
+                    "26: 髪の毛をサラサラにする", "27: 睡魔を貯金できる", "28: 探し物が見つかる", "29: 怒りの感情を電気に変える", "30: どんな椅子もソファに変える",
+                    "31: 太陽光でスマホ充電", "32: 毒を無効化する", "33: 他人の秘密が1つ漏れる", "34: ダンスが上手くなる", "35: 空気が読めるようになる",
+                    "36: 誰かの靴下と交信する", "37: 自分の体重を偽装する", "38: 言い訳を自動生成する", "39: 摩擦熱で発電する", "40: 磁石になる",
+                    "41: 運命の糸を可視化する", "42: 静寂を創り出す", "43: 全ての鍵を開ける", "44: 宇宙からの信号を受信", "45: 筋肉を強調して見せる",
+                    "46: 不安を癒やす香りを出す", "47: 転んでも痛くない", "48: 利き手を逆にする", "49: 存在自体を忘れさせる", "50: 世界を救う（1回のみ）"
+                ]
+            },
+            {
+                title: "3. そのパンツを「手に入れた経緯」を教えてください。",
+                options: [
+                    "1: コンビニのレジ横で", "2: 砂漠の真ん中に落ちていた", "3: 先祖代々受け継がれた", "4: 宇宙からの贈り物", "5: ガチャポンの景品",
+                    "6: 闇オークションで競り落とした", "7: 川上から流れてきた", "8: 自分をパンツだと思い込む鳥から", "9: 夢の中の売店で", "10: 図書館の本に挟まっていた",
+                    "11: 異世界の自分から郵送", "12: タイムカプセルから出現", "13: 植物を育てたら実った", "14: 雷に打たれて生成された", "15: 懸賞で当たった100年分",
+                    "16: 拾ったランプの魔人の代わり", "17: 賢者からの退職金", "18: 秘密結社の入会特典", "19: たまたま履いていた", "20: 鏡の中から奪い取った",
+                    "21: 自動販売機の誤作動で", "22: 恋人が置いていった遺留品", "23: 神社のお守りの中に", "24: バーゲンセールの戦利品", "25: 錬金術の失敗作",
+                    "26: 地下オークションの裏メニュー", "27: 誰かの忘れ物を洗った", "28: 未来の自分に借りた", "29: 謎の暗号を解いた報酬", "30: 空から降ってきた",
+                    "31: 砂浜に埋まっていた", "32: クラウドファンディングで", "33: 誕生日に見知らぬ人から", "34: 海の底の沈没船から", "35: 妖精との物々交換",
+                    "36: 偶然手にした設計図で自作", "37: 伝説の剣を抜いたら出た", "38: ゲームの隠しコマンドで", "39: 福袋の底にへばりついていた", "40: 月面で採取された",
+                    "41: 自分の涙を固めて作った", "42: 猫が運んできた", "43: 1万個に1個の当たり", "44: 廃墟のタンスで発見", "45: 龍の鱗と引き換えに",
+                    "46: 修行の末に悟りと共に", "47: ドッキリの仕掛け品", "48: 記憶の断片から復元", "49: 魔法学校の制服", "50: 気が付いたら履いていた"
+                ]
+            },
+            {
+                title: "4. そのパンツの「市場価値」はどのくらい？",
+                options: [
+                    "1: スマイル0円", "2: 駄菓子1個分", "3: 魂の半分", "4: 地球の時価総額分", "5: プライスレス",
+                    "6: 10年分の寿命", "7: 誰かの秘密1つ分", "8: お釣りでもらえる額", "9: ダイヤモンド1トン分", "10: 感謝の気持ちだけで可",
+                    "11: 宇宙旅行3回分", "12: コンビニ弁当2個分", "13: 国の借金と同じ額", "14: 缶ジュース1本分", "15: 未来の幸福と等価交換",
+                    "16: 100円ショップの在庫全部", "17: 伝説の武器より高い", "18: 無料（ただし広告付き）", "19: 指定した夢を見れる権利", "20: 無限の愛と同価値",
+                    "21: 牛丼並盛りセット分", "22: 宝くじの当選金", "23: 思い出の数だけ割引", "24: 月の土地1エーカー", "25: 銀行強盗のリスク分",
+                    "26: 誰にも言えない過去分", "27: たった一度の「ありがとう」", "28: ビットコイン10枚分", "29: 高級車が買える程度", "30: 拾った人の勝ち",
+                    "31: 借金してでも買う価値あり", "32: 世界の平和を10分維持", "33: おみくじの「吉」100枚分", "34: 何もかもを捨てた後の全財産", "35: 前世の功徳分",
+                    "36: チロルチョコ全種類", "37: 都会のマンション1棟分", "38: 自分という存在そのもの", "39: 誰かの鼻歌1曲分", "40: 宇宙人の指名手配金",
+                    "41: 破れた靴下100足と交換可", "42: この世の全ての涙と同量", "43: 1クリックの価値", "44: 宝石箱1つ分", "45: 魔法の杖100本分",
+                    "46: 10分間の静寂", "47: 自分の1日分の給料", "48: 歴史を変える力", "49: 未知のエネルギー源", "50: 測定不能"
+                ]
+            },
+            {
+                title: "5. そのパンツに訪れた「最大のハプニング」は？",
+                options: [
+                    "1: 逆さまに履いていた", "2: 自我を持って逃げ出した", "3: 洗濯機の中で反乱を起こした", "4: 透明になってしまった", "5: 他人のパンツと入れ替わった",
+                    "6: 異次元へ吸い込まれた", "7: 宇宙服として採用された", "8: 喋り始めた", "9: 急激に巨大化した", "10: 味方に裏切られた",
+                    "11: 食べられた", "12: 凍って砕け散った", "13: 歴史上の人物が履いた", "14: 宗教の崇拝対象になった", "15: ネットで炎上した",
+                    "16: 分身した", "17: 犬と喧嘩して負けた", "18: 国歌の歌詞に登場した", "19: 穴が一つもなくなった", "20: 全ての汚れを光に変えた",
+                    "21: 空を飛んでどこかへ行った", "22: 名前を忘れてしまった", "23: 呪いがかかって脱げない", "24: 音楽を奏で始めた", "25: 過去へタイムスリップした",
+                    "26: 肥料になった", "27: 爆発したが無傷だった", "28: 幽体離脱した", "29: 警察に職質された", "30: オリンピック競技になった",
+                    "31: 突然、猫になった", "32: 溶けて水になった", "33: ダイヤモンドに変異した", "34: 未来予知を始めた", "35: 誰かの脳内に語りかけた",
+                    "36: 宇宙船の帆になった", "37: 二足歩行を始めた", "38: 辞書に載った", "39: 博物館に寄贈された", "40: 恋に落ちた",
+                    "41: 全ての夢を叶えてしまった", "42: 宇宙の塵になった", "43: 何もかもを吸い込んだ", "44: 世界を救ってボロボロに", "45: 自分の複製を作った",
+                    "46: 真っ黒から真っ白に反転", "47: 香水に浸かった", "48: 誰の記憶からも消えた", "49: 存在そのものがバグった", "50: 伝説になった"
+                ]
+            },
+            {
+                title: "6. そのパンツが「引退（寿命）」を迎える時に言いそうなことは？",
+                options: [
+                    "1: 「あとは頼んだぞ…」", "2: 「案外、窮屈じゃなかったよ」", "3: 「次はスカートになりたい」", "4: 「実は私、ズボンでした」", "5: 「洗濯機、怖かったな」",
+                    "6: 「あなたの温度、忘れない」", "7: 「穴が開いても心は一つ」", "8: 「もっと冒険したかった」", "9: 「お疲れ、相棒」", "10: 「自由だーーーー！」",
+                    "11: 「ゴムの限界だ…」", "12: 「もう一回、回して…」", "13: 「私を、雑巾にしないで」", "14: 「次は誰を支えるんだろう」", "15: 「最高にいい眺めだった」",
+                    "16: 「静かに眠らせてくれ」", "17: 「夢なら覚めないで」", "18: 「宇宙の果てで会おう」", "19: 「恥ずかしくなんてなかった」", "20: 「最後に笑ってくれ」",
+                    "21: 「あばよ、未練はないぜ」", "22: 「洗剤の銘柄、変えてほしかった」", "23: 「明日からはノーパンでな」", "24: 「誇り高き繊維だった」", "25: 「太陽が眩しいぜ…」",
+                    "26: 「生まれ変わったら鳥に」", "27: 「君の成長を見守ったよ」", "28: 「秘密は墓まで持っていく」", "29: 「愛していたよ、その肌を」", "30: 「サヨナラは言わないぜ」",
+                    "31: 「糸が…解けていく…」", "32: 「結構、いい人生だった」", "33: 「次はもっと派手なやつを」", "34: 「最後に一言、お腹すいた」", "35: 「君の秘密を知りすぎた」",
+                    "36: 「燃えるゴミにはしないで」", "37: 「誰にも言わなかったけど…」", "38: 「このタグを外さないで」", "39: 「私の柄を忘れるな」", "40: 「ついに解放されるんだな」",
+                    "41: 「風が通り抜けていく…」", "42: 「いい思い出、ありがとう」", "43: 「もう、伸縮できない…」", "44: 「世界は、広かったね」", "45: 「君の背中、好きだった」",
+                    "46: 「最後の最後でゴムが切れるとは」", "47: 「静かに灰になりたい」", "48: 「記憶、共有したかったな」", "49: 「私を、覚えていますか？」", "50: 「……（無言の満足）」"
+                ]
+            },
+            {
+                title: "7. 結局のところ、あなたにとって「パンツ」とは何？",
+                options: [
+                    "1: 第二の皮膚", "2: 社会との境界線", "3: 魂の器", "4: 最後に砦", "5: ただの布きれ",
+                    "6: 宇宙の始まり", "7: 自意識のフィルター", "8: ファッションの核", "9: 秘密の共有者", "10: 安心感の象徴",
+                    "11: 戦闘服", "12: 無意識の依存先", "13: 人類最高の発明", "14: 義務", "15: 自由への翼",
+                    "16: 身体の一部", "17: 防御魔法", "18: 美学の追求", "19: 日常のルーチン", "20: 孤独の相棒",
+                    "21: 生命エネルギー", "22: 哲学", "23: 面倒なルール", "24: 愛の結晶", "25: 過去からの遺物",
+                    "26: 重力への抵抗", "27: 自己表現", "28: 羞恥心のブレーキ", "29: 進化の証", "30: 夢の終わり",
+                    "31: 鏡", "32: 世界への回答", "33: 静寂の音楽", "34: 存在理由", "35: 神への冒涜",
+                    "36: 無垢な心", "37: 運命の導き", "38: 時間の記録", "39: 混沌の中の秩序", "40: 未完成の芸術",
+                    "41: 絆", "42: 希望", "43: 不変の真理", "44: 闇を照らす光", "45: 無言の代弁者",
+                    "46: 微かな温もり", "47: 宇宙の心理", "48: 唯一無二の自分", "49: 無限の可能性", "50: パンツこそが世界"
+                ]
+            }
+        ];
+
+        let state = {
+            step: 'intro',
+            currentQ: 0,
+            answers: []
+        };
+
+        function render() {
+            const app = document.getElementById('app');
+            
+            if (state.step === 'intro') {
+                app.innerHTML = `
+                    <div class="flex-1 flex flex-col items-center justify-center text-center space-y-12">
+                        <div class="w-24 h-24 bg-pink-500 rounded-3xl rotate-12 flex items-center justify-center shadow-xl shadow-pink-200">
+                            <svg class="text-white w-12 h-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                        </div>
+                        <div class="space-y-4">
+                            <h1 class="text-4xl font-bold tracking-tight text-neutral-900">
+                                究極の<br /><span class="text-pink-600 italic underline decoration-wavy underline-offset-8">パンツ鑑定</span>
+                            </h1>
+                            <p class="text-neutral-500 text-sm leading-relaxed max-w-xs mx-auto">
+                                50種類の選択肢から、あなたの深層心理を紐解き、世界に一つだけの鑑定書を作成します。
+                            </p>
+                        </div>
+                        <button onclick="startQuiz()" class="w-full py-5 bg-neutral-900 text-white rounded-full font-bold hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2">
+                            診断をはじめる
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                `;
+            } else if (state.step === 'quiz') {
+                const q = questions[state.currentQ];
+                app.innerHTML = `
+                    <div class="flex-1 flex flex-col py-10">
+                        <div class="flex justify-between items-center mb-10">
+                            <div class="text-xs font-bold uppercase tracking-widest text-neutral-400">Step ${state.currentQ + 1} of 7</div>
+                            <div class="h-1.5 w-32 bg-neutral-200 rounded-full overflow-hidden">
+                                <div class="h-full bg-pink-500 transition-all duration-300" style="width: ${((state.currentQ + 1) / 7) * 100}%"></div>
+                            </div>
+                        </div>
+                        <h2 class="text-2xl font-bold text-neutral-900 mb-8 leading-snug">${q.title}</h2>
+                        <div class="grid grid-cols-1 gap-2 custom-scrollbar overflow-y-auto max-h-[60vh] pr-1">
+                            ${q.options.map((opt, i) => `
+                                <button onclick="handleSelect(${i})" class="group w-full p-4 text-left bg-white border border-neutral-200 rounded-2xl hover:border-pink-500 hover:bg-pink-50/50 transition-all flex items-center gap-4">
+                                    <span class="text-[10px] font-mono text-neutral-300 group-hover:text-pink-400 w-4">${(i + 1).toString().padStart(2, '0')}</span>
+                                    <span class="text-sm font-medium">${opt.split(': ')[1]}</span>
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } else if (state.step === 'result') {
+                const title = `${state.answers[0].split(': ')[1]}なる${state.answers[6].split(': ')[1]}`;
+                app.innerHTML = `
+                    <div class="flex-1 flex flex-col py-10">
+                        <div class="bg-white border-2 border-neutral-900 rounded-[2.5rem] p-8 shadow-2xl shadow-neutral-200 relative overflow-hidden">
+                            <div class="absolute top-0 right-10 w-8 h-12 bg-neutral-900 flex flex-col items-center justify-end pb-2">
+                                <div class="w-2 h-2 rounded-full bg-white opacity-20"></div>
+                            </div>
+                            <div class="text-center space-y-2 mb-10">
+                                <svg class="mx-auto text-pink-500 mb-2" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                                <h2 class="text-xs font-black tracking-[0.4em] text-neutral-400 uppercase">Certificate of Identity</h2>
+                                <h3 class="text-3xl font-black text-neutral-900 break-words leading-tight px-4">${title}</h3>
+                            </div>
+                            <div class="space-y-6 border-t border-dashed border-neutral-200 pt-8 text-left">
+                                ${state.answers.map((ans, i) => `
+                                    <div class="flex flex-col gap-1">
+                                        <span class="text-[10px] font-bold text-pink-500 uppercase tracking-widest">${questions[i].title.match(/「(.*?)」/)[1]}</span>
+                                        <p class="text-base font-bold text-neutral-800">${ans.split(': ')[1]}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="mt-12 pt-8 border-t border-neutral-100 flex flex-col items-center gap-4">
+                                <div class="text-[10px] text-neutral-400 font-mono">VERIFIED BY PANTS SYSTEM V2.0</div>
+                                <div class="flex gap-1">${Array(7).fill('<div class="w-1.5 h-1.5 rounded-full bg-pink-200"></div>').join('')}</div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-3 mt-8">
+                            <button onclick="copyResult()" class="w-full py-5 bg-neutral-900 text-white rounded-3xl font-bold flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-95 transition-all">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+                                鑑定書をシェアする
+                            </button>
+                            <button onclick="resetApp()" class="w-full py-5 bg-white border border-neutral-200 text-neutral-400 rounded-3xl font-bold flex items-center justify-center gap-2 hover:bg-neutral-50 active:scale-95 transition-all">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                                もう一度やり直す
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function startQuiz() {
+            state.step = 'quiz';
+            render();
+        }
+
+        function handleSelect(idx) {
+            state.answers.push(questions[state.currentQ].options[idx]);
+            if (state.currentQ < questions.length - 1) {
+                state.currentQ++;
+                render();
+                window.scrollTo(0, 0);
+            } else {
+                state.step = 'result';
+                render();
+            }
+        }
+
+        function resetApp() {
+            state = { step: 'intro', currentQ: 0, answers: [] };
+            render();
+        }
+
+        function copyResult() {
+            const title = `${state.answers[0].split(': ')[1]}なる${state.answers[6].split(': ')[1]}`;
+            const summary = state.answers.map((a, i) => `Q${i+1}: ${a.split(': ')[1]}`).join('\n');
+            const text = `【唯一無二のパンツ鑑定書】\n称号：${title}\n\n${summary}\n#パンツ診断 #唯一無二`;
+            
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            
+            // Simple visual feedback
+            const btn = document.querySelector('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'コピーしました！';
+            setTimeout(() => { btn.innerHTML = originalText; }, 2000);
+        }
+
+        // Initial render
+        window.onload = render;
+    </script>
+</body>
+</html>
